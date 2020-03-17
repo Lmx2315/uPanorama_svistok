@@ -2010,14 +2010,14 @@ int main(void)
 
   MX_DMA_Init ();
   MX_ADC1_Init();
-  MX_TIM1_Init();
-  MX_SPI2_Init();
+//MX_TIM1_Init();
+//MX_SPI2_Init();
   MX_SPI3_Init();
-  MX_SPI4_Init();
-  MX_SPI5_Init();
+//MX_SPI4_Init();
+//MX_SPI5_Init();
   MX_USART1_UART_Init();
 //MX_USART2_UART_Init();
-  MX_USART6_UART_Init();
+//MX_USART6_UART_Init();
   /* USER CODE BEGIN 2 */
 
 //  Delay(1000);
@@ -2036,8 +2036,6 @@ int main(void)
  
   HAL_UART_Receive_IT(&huart1,RX_uBUF,1);
   HAL_ADC_Start_DMA  (&hadc1,(uint32_t*)&adcBuffer,1); // Start ADC in DMA 
-  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
-  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_4);
 
  GK153_PWRDN		(0);
  ADL_PWRDN			(0);// 1 - powerdown ADL5375
@@ -2067,20 +2065,11 @@ int main(void)
 ADF_LE	  (0);//сигнал загрузки в м-му ADF 
 SPI3_CS_MK(0);//выключение микрухи ADF 
  ATT (0);
-//--------init wiz820------------------
-
- SPI4_NSS_MK(1);
- PWDWN_WIZ820(0);//снимаем повердаун с wiz820
- SPI4_NSS_MK(1);
- RESET_WIZ(0);
- Delay(2);
- RESET_WIZ(1);
  
   LED1(0);
   LED2(0);
   LED3(0);
-  
-  INIT_SERV_ARCHIV (&SERV1,&ID_SERV1,&ADDR_SNDR);//инициилизируем хранилище и реестр
+
 
  while (i<200)
  {
@@ -2088,24 +2077,12 @@ SPI3_CS_MK(0);//выключение микрухи ADF
 	 Delay(1);
  } 
 
- Set_network();
- RECEIVE_udp (0, 3001);
-
   while (1)
   {
 	LED();
 	UART_conrol();
 	PLL_ZAHVAT ();
-	
-	if (EVENT_INT8==1)
-	{
-		EVENT_INT8=0;
-		Transf("event WIZ820!\r");
-		RECEIVE_udp (0, 3001);		
-	};
-	RECEIVE_udp (0, 3001);	
-	CMD_search (&ID_SERV1,&SERV1);
-	SEND_UDP_MSG ();
+
     UART_DMA_TX();
 	if (FLAG_DMA_ADC==1) {DMA_ADC();FLAG_DMA_ADC=0;}	
   }

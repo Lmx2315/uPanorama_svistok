@@ -763,11 +763,11 @@ ARM Macro Assembler    Page 12
               00000000 
 Command Line: --debug --xref --cpu=Cortex-M4.fp --apcs=interwork --depend=.\tem
 p_pj1\startup_stm32f411xe.d -o.\temp_pj1\startup_stm32f411xe.o -IC:\Work\projec
-t_Micropanorama\uPanorama_modulator\temp_Pj1\MDK-ARM\RTE -IC:\Keil_v5\ARM\PACK\
-ARM\CMSIS\4.2.0\CMSIS\Include -IC:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.11.0 -
--predefine="__MICROLIB SETA 1" --predefine="__UVISION_VERSION SETA 513" --prede
-fine="_RTE_ SETA 1" --predefine="STM32F411xE SETA 1" --list=startup_stm32f411xe
-.lst startup_stm32f411xe.s
+t_Micropanorama\uPanorama_svistok\temp_Pj1\MDK-ARM\RTE -IC:\Keil_v5\ARM\PACK\AR
+M\CMSIS\4.2.0\CMSIS\Include -IC:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.11.0 --p
+redefine="__MICROLIB SETA 1" --predefine="__UVISION_VERSION SETA 513" --predefi
+ne="_RTE_ SETA 1" --predefine="STM32F411xE SETA 1" --list=startup_stm32f411xe.l
+st startup_stm32f411xe.s
 
 
 
