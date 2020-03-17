@@ -319,7 +319,7 @@ static void MX_ADC1_Init(void)
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc1.Init.NbrOfConversion = 16;
+  hadc1.Init.NbrOfConversion = 4;
   hadc1.Init.DMAContinuousRequests = ENABLE;
   hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
@@ -330,6 +330,27 @@ static void MX_ADC1_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_0;
   sConfig.Rank = 1;
+  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfig.Channel = ADC_CHANNEL_1;
+  sConfig.Rank = 2;
+  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfig.Channel = ADC_CHANNEL_3;
+  sConfig.Rank = 3;
+  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfig.Channel = ADC_CHANNEL_4;
+  sConfig.Rank = 4;
   sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -1673,11 +1694,11 @@ void ADC_test (void)
 
 	adc_cntl=0;	
 	
-	adc_ch[ 0] = ((float)adcBuffer[0])*3.3/4096*2;
+	adc_ch[ 0] = ((float)adcBuffer[0])*3.3/4096;
+	adc_ch[ 1] = ((float)adcBuffer[1])*3.3/4096*5;
+	adc_ch[ 2] = ((float)adcBuffer[2])*3.3/4096*5;
+	adc_ch[ 3] = ((float)adcBuffer[3])*3.3/4096*5;
 /*
-	adc_ch[ 1] = ((float)adcBuffer[1])*3.3/4096*2;
-	adc_ch[ 2] = ((float)adcBuffer[2])*3.3*5.71428/4096;//12 Вольт делитель 47к-10к
-	adc_ch[ 3] = ((float)adcBuffer[3])*3.3/4096*2;
 	adc_ch[ 4] = ((float)adcBuffer[4])*3.3/4096;
 	adc_ch[ 5] = ((float)adcBuffer[4])*3.3/4096;
 	adc_ch[ 6] = ((float)adcBuffer[4])*3.3/4096;
@@ -1693,8 +1714,12 @@ void ADC_test (void)
 	*/
 	
 	Transf("\r\n---------\r\n");
-	f_out("REF power:",adc_ch[0 ]);
-	u_out("adcBuffer:",adcBuffer[0 ]);
+	f_out("REF power  :",adc_ch[0 ]);
+	f_out("BAT control:",adc_ch[1 ]);
+	f_out("V5V_control:",adc_ch[2 ]);
+	f_out("3.3_control:",adc_ch[3 ]);
+	
+//	u_out("adcBuffer:",adcBuffer[0 ]);
 /*
 	f_out("CONTR_2_4     :",adc_ch[1 ]);
 	f_out("CONTR_3_4     :",adc_ch[2 ]);
@@ -1732,7 +1757,7 @@ u8 FLAG_WDG=0;
 void DMA_ADC (void)
 {
 	HAL_ADC_Start(&hadc1);
-	HAL_ADC_Start_DMA  (&hadc1,(uint32_t*)&adcBuffer,16); // Start ADC in DMA 	
+	HAL_ADC_Start_DMA  (&hadc1,(uint32_t*)&adcBuffer,4); // Start ADC in DMA 	
 }
 
 void WATCH_DOG (void)
@@ -2021,10 +2046,10 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
 //  Delay(1000);
-  
-  Transf("-------------------\r\n");
-  Transf("    uПанорама\r\n");
-  Transf("-------------------\r\n");
+  Transf("\r\n"); 
+  Transf("---------------------------\r\n");
+  Transf("    uПанорама - Свисток\r\n");
+  Transf("---------------------------\r\n");
   
   PWDWN_WIZ820(1);
 
@@ -2035,7 +2060,7 @@ int main(void)
   Massiv_dbm();
  
   HAL_UART_Receive_IT(&huart1,RX_uBUF,1);
-  HAL_ADC_Start_DMA  (&hadc1,(uint32_t*)&adcBuffer,1); // Start ADC in DMA 
+  HAL_ADC_Start_DMA  (&hadc1,(uint32_t*)&adcBuffer,4); // Start ADC in DMA 
 
  GK153_PWRDN		(0);
  ADL_PWRDN			(0);// 1 - powerdown ADL5375
