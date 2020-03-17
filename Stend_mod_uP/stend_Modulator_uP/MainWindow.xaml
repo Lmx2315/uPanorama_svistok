@@ -1,0 +1,19 @@
+﻿<Window x:Class="stend_Modulator_uP.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:stend_Modulator_uP"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <TextBox x:Name="textBox" HorizontalAlignment="Left" Margin="61,108,0,0" Text="3000" TextWrapping="Wrap" VerticalAlignment="Top" Width="48"/>
+        <Label x:Name="label" Content="Freq" HorizontalAlignment="Left" Margin="16,106,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="label1" Content="MHz" HorizontalAlignment="Left" Margin="114,106,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="textBox_IP_eth" HorizontalAlignment="Left" Margin="44,19,0,0" Text="1.3.1.61" TextWrapping="Wrap" VerticalAlignment="Top" Width="52"/>
+        <TextBox x:Name="text_box_Port_eth" HorizontalAlignment="Left" Margin="44,54,0,0" Text="3001" TextWrapping="Wrap" VerticalAlignment="Top" Width="52"/>
+        <Label x:Name="label_Copy" Content="IP" HorizontalAlignment="Left" Margin="19,19,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="label_Copy1" Content="Port" HorizontalAlignment="Left" Margin="12,52,0,0" VerticalAlignment="Top"/>
+
+    </Grid>
+</Window>

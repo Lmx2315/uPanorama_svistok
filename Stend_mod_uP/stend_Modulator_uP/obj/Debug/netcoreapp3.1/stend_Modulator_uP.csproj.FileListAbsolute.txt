@@ -1,0 +1,17 @@
+C:\Work\project_Micropanorama\uPanorama_modulator\Stend_mod_uP\stend_Modulator_uP\bin\Debug\netcoreapp3.1\stend_Modulator_uP.exe
+C:\Work\project_Micropanorama\uPanorama_modulator\Stend_mod_uP\stend_Modulator_uP\bin\Debug\netcoreapp3.1\stend_Modulator_uP.deps.json
+C:\Work\project_Micropanorama\uPanorama_modulator\Stend_mod_uP\stend_Modulator_uP\bin\Debug\netcoreapp3.1\stend_Modulator_uP.runtimeconfig.json
+C:\Work\project_Micropanorama\uPanorama_modulator\Stend_mod_uP\stend_Modulator_uP\bin\Debug\netcoreapp3.1\stend_Modulator_uP.runtimeconfig.dev.json
+C:\Work\project_Micropanorama\uPanorama_modulator\Stend_mod_uP\stend_Modulator_uP\bin\Debug\netcoreapp3.1\stend_Modulator_uP.dll
+C:\Work\project_Micropanorama\uPanorama_modulator\Stend_mod_uP\stend_Modulator_uP\bin\Debug\netcoreapp3.1\stend_Modulator_uP.pdb
+C:\Work\project_Micropanorama\uPanorama_modulator\Stend_mod_uP\stend_Modulator_uP\obj\Debug\netcoreapp3.1\stend_Modulator_uP.csprojAssemblyReference.cache
+C:\Work\project_Micropanorama\uPanorama_modulator\Stend_mod_uP\stend_Modulator_uP\obj\Debug\netcoreapp3.1\MainWindow.g.cs
+C:\Work\project_Micropanorama\uPanorama_modulator\Stend_mod_uP\stend_Modulator_uP\obj\Debug\netcoreapp3.1\App.g.cs
+C:\Work\project_Micropanorama\uPanorama_modulator\Stend_mod_uP\stend_Modulator_uP\obj\Debug\netcoreapp3.1\stend_Modulator_uP_MarkupCompile.cache
+C:\Work\project_Micropanorama\uPanorama_modulator\Stend_mod_uP\stend_Modulator_uP\obj\Debug\netcoreapp3.1\stend_Modulator_uP_MarkupCompile.lref
+C:\Work\project_Micropanorama\uPanorama_modulator\Stend_mod_uP\stend_Modulator_uP\obj\Debug\netcoreapp3.1\MainWindow.baml
+C:\Work\project_Micropanorama\uPanorama_modulator\Stend_mod_uP\stend_Modulator_uP\obj\Debug\netcoreapp3.1\stend_Modulator_uP.g.resources
+C:\Work\project_Micropanorama\uPanorama_modulator\Stend_mod_uP\stend_Modulator_uP\obj\Debug\netcoreapp3.1\stend_Modulator_uP.AssemblyInfoInputs.cache
+C:\Work\project_Micropanorama\uPanorama_modulator\Stend_mod_uP\stend_Modulator_uP\obj\Debug\netcoreapp3.1\stend_Modulator_uP.AssemblyInfo.cs
+C:\Work\project_Micropanorama\uPanorama_modulator\Stend_mod_uP\stend_Modulator_uP\obj\Debug\netcoreapp3.1\stend_Modulator_uP.dll
+C:\Work\project_Micropanorama\uPanorama_modulator\Stend_mod_uP\stend_Modulator_uP\obj\Debug\netcoreapp3.1\stend_Modulator_uP.pdb
