@@ -63,8 +63,8 @@ TIM_HandleTypeDef htim1;
 
 /* USER CODE BEGIN PV */
 
-volatile  uint16_t adcBuffer[5]; // Buffer for store the results of the ADC conversion
-float adc_ch[17];
+volatile  uint16_t adcBuffer[32]; // Buffer for store the results of the ADC conversion
+float adc_ch[32];
 
 uint8_t transmitBuffer[32];
 uint8_t receiveBuffer[32];
@@ -139,6 +139,9 @@ char pack_ok1;
 char pack_sum1;
 char sym1;
 
+float U12V=0;
+float U5V =0;
+float U3V3=0;
 
 u32 sch_rx_byte;
   
@@ -342,14 +345,14 @@ static void MX_ADC1_Init(void)
   {
     Error_Handler();
   }
-  sConfig.Channel = ADC_CHANNEL_3;
+  sConfig.Channel = ADC_CHANNEL_2;
   sConfig.Rank = 3;
   sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
   }
-  sConfig.Channel = ADC_CHANNEL_4;
+  sConfig.Channel = ADC_CHANNEL_3;
   sConfig.Rank = 4;
   sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
@@ -654,7 +657,7 @@ static void MX_DMA_Init(void)
   __HAL_RCC_DMA2_CLK_ENABLE();
 
   /* DMA interrupt init */
-  /* DMA2_Stream0_IRQn interrupt configuration */
+  /* DMA2_Stream0_IRQn interrupt configuration */ //ADC
   HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
   /* DMA2_Stream6_IRQn interrupt configuration */
@@ -1417,7 +1420,10 @@ if (strcmp(Word,"MSG")==0) //
    {
 	  crc_comp =atoi  (DATA_Word); 
       u_out ("принял adc:",crc_comp); 
-      ADC_test ();
+     // ADC_test ();
+	 f_out("U12V:",U12V);
+	 f_out("U5V :",U5V);
+	 f_out("U3V3:",U3V3);
    } else
 if (strcmp(Word,"help")==0)                     
    {
@@ -1690,66 +1696,32 @@ return TCelsius;
 
 void ADC_test (void)
 {
-//	u32 i=0;
+	float f=0;
+	
+    u_out("CONTR_0     :",adcBuffer[0 ]);
+	u_out("CONTR_1     :",adcBuffer[1 ]);
+	u_out("CONTR_2     :",adcBuffer[2 ]);
+	u_out("CONTR_3     :",adcBuffer[3 ]);	
+	
+	f=adcBuffer[0]*3.3*5.83/4096;
+	f_out("adc0:",f);
+	
+	f=adcBuffer[1]*3.3*6.225/4096;//12V
+	f_out("adc1:",f);
+	
+	f=adcBuffer[2]*3.3*5.83/4096;//5V
+	f_out("adc2:",f);
+	
+	f=adcBuffer[3]*3.3*5.92/4096;//3.3V
+	f_out("adc3:",f);
+	
+}
 
-	adc_cntl=0;	
-	
-	adc_ch[ 0] = ((float)adcBuffer[0])*3.3/4096;
-	adc_ch[ 1] = ((float)adcBuffer[1])*3.3/4096*5;
-	adc_ch[ 2] = ((float)adcBuffer[2])*3.3/4096*5;
-	adc_ch[ 3] = ((float)adcBuffer[3])*3.3/4096*5;
-/*
-	adc_ch[ 4] = ((float)adcBuffer[4])*3.3/4096;
-	adc_ch[ 5] = ((float)adcBuffer[4])*3.3/4096;
-	adc_ch[ 6] = ((float)adcBuffer[4])*3.3/4096;
-	adc_ch[ 7] = ((float)adcBuffer[4])*3.3/4096;
-	adc_ch[ 8] = ((float)adcBuffer[4])*3.3/4096;
-	adc_ch[ 9] = ((float)adcBuffer[4])*3.3/4096;
-	adc_ch[10] = ((float)adcBuffer[4])*3.3/4096;
-	adc_ch[11] = ((float)adcBuffer[4])*3.3/4096;
-	adc_ch[12] = ((float)adcBuffer[4])*3.3/4096;
-	adc_ch[13] = ((float)adcBuffer[4])*3.3/4096;
-	adc_ch[14] = ((float)adcBuffer[4])*3.3/4096;
-	adc_ch[15] = ((float)adcBuffer[4])*3.3/4096;
-	*/
-	
-	Transf("\r\n---------\r\n");
-	f_out("REF power  :",adc_ch[0 ]);
-	f_out("BAT control:",adc_ch[1 ]);
-	f_out("V5V_control:",adc_ch[2 ]);
-	f_out("3.3_control:",adc_ch[3 ]);
-	
-//	u_out("adcBuffer:",adcBuffer[0 ]);
-/*
-	f_out("CONTR_2_4     :",adc_ch[1 ]);
-	f_out("CONTR_3_4     :",adc_ch[2 ]);
-	f_out("CONTR_4_4     :",adc_ch[3 ]);
-	
-	f_out("CONTR_1_1	 :",adc_ch[4 ]);
-	f_out("CONTR_2_1     :",adc_ch[5 ]);
-	f_out("CONTR_3_1     :",adc_ch[6 ]);
-	f_out("CONTR_4_1     :",adc_ch[7 ]);
-	
-	f_out("CONTR_1_2	 :",adc_ch[8 ]);
-	f_out("CONTR_2_2     :",adc_ch[9 ]);
-	f_out("CONTR_3_2     :",adc_ch[10]);
-	f_out("CONTR_4_2     :",adc_ch[11]);
-	
-	f_out("CONTR_1_3	 :",adc_ch[12]);
-	f_out("CONTR_2_3     :",adc_ch[13]);
-	f_out("CONTR_3_3     :",adc_ch[14]);
-	f_out("CONTR_4_3     :",adc_ch[15]);
-*/
-//	f_out("temp_sens(С)  :",ADC_Temp(adc_ch[4]));
-	
-//	Transf("\r\r\r");
-
-/*
-	u_out("CONTR_2_4     :",adcBuffer[1 ]);
-	u_out("CONTR_3_4     :",adcBuffer[2 ]);
-	u_out("CONTR_4_4     :",adcBuffer[3 ]);
-	*/
-	
+void ADC_meas (void)
+{
+	U12V=adcBuffer[1]*3.3*6.225/4096;//12V
+	U5V =adcBuffer[2]*3.3*5.83/4096;//5V
+	U3V3=adcBuffer[3]*3.3*5.92/4096;//3.3V
 }
 
 u8 FLAG_WDG=0;
@@ -2060,7 +2032,7 @@ int main(void)
   Massiv_dbm();
  
   HAL_UART_Receive_IT(&huart1,RX_uBUF,1);
-  HAL_ADC_Start_DMA  (&hadc1,(uint32_t*)&adcBuffer,4); // Start ADC in DMA 
+  HAL_ADC_Start_DMA  (&hadc1,(uint32_t*)&adcBuffer,8); // Start ADC in DMA 
 
  GK153_PWRDN		(0);
  ADL_PWRDN			(0);// 1 - powerdown ADL5375
@@ -2107,9 +2079,9 @@ SPI3_CS_MK(0);//выключение микрухи ADF
 	LED();
 	UART_conrol();
 	PLL_ZAHVAT ();
-
+	ADC_meas   ();
     UART_DMA_TX();
-	if (FLAG_DMA_ADC==1) {DMA_ADC();FLAG_DMA_ADC=0;}	
+//	if (FLAG_DMA_ADC==1) {DMA_ADC();FLAG_DMA_ADC=0;}	
   }
 
 }
