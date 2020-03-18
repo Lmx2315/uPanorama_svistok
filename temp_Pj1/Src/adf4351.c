@@ -77,7 +77,7 @@ void INIT_PLL (reg_ADF4351 *pll)
 	pll->CLK_DIV_MODE					=0;// 0 - disable, 1-activate fast lock
 	pll->CLOCK_DIV_VALUE				=150;
 	pll->FEEDBACK_SELECT				=1;// 1 - fundamental
-	pll->RF_DIVIDER_SELECT				=0;// RF divider :1 
+	pll->RF_DIVIDER_SELECT				=0;// RF divider 0:1 |1:2 
 	pll->BAND_SELECT_CLOCK_DIVIDER_VALUE=8;//Надо менять взависимости от частоты сравнения!!!! (fref/0.125)
 	pll->VCO_POWER_DOWN					=0;// 0 - VCO power up
 	pll->MTLD							=0;// 0 - mute disable
@@ -87,7 +87,6 @@ void INIT_PLL (reg_ADF4351 *pll)
 	pll->RF_OUTPUT_ENABLE				=1;//1 - enable
 	pll->OUTPUT_POWER					=3;//3 - +5DBm
 	pll->LD_PIN_MODE					=1;//1 - LOCK DETECT DIGITAL	
-	
 
 }
 

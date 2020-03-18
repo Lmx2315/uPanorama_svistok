@@ -1351,7 +1351,7 @@ if (strcmp(Word,"att")==0) //
 if (strcmp(Word,"APLF")==0) //
    {
 	  crc_comp =atoi  (DATA_Word); 
-      u_out ("принял att:",crc_comp); 
+      u_out ("принял APLF:",crc_comp); 
 	  APLF1_PWRDN (crc_comp);// 1 - усилитель (1) выключен
 	  APLF2_PWRDN (crc_comp);// 1 - усилитель (2) выключен
    } else
@@ -1959,11 +1959,12 @@ void PLL_ZAHVAT (void)//наблюдает за сигналом захвата ФАПЧ
 	if ((FLAG_PLL_ZAHVAT==1)&&(t1==0))
 	{
 		    Transf("Захват ФАПЧ!\r\n");
-		t1=1;
+			t1=1;
 	}else
 		if ((FLAG_PLL_ZAHVAT==0)&&(t1==1))
 		{
 			Transf("Авария ФАПЧ!\r\n");
+			t1=0;
 		}
 }
 
