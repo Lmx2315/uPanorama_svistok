@@ -77,27 +77,30 @@ u32 FLAG_T1;
 u32 FLAG_T2;
 u8 FLAG_FAPCH_ON;
 
+//----------дл€ uart1----------------------------------
 uint8_t 		RX1_uBUF[1];
 unsigned int 	timer_DMA2_7;
 u8 				flag_pachka_TXT1; //
 uint16_t  		text_lengh1;
-uint8_t 		text_buffer[Bufer_size];
+uint8_t 		text_buffer1[Bufer_size];
 volatile char          	rx_buffer1[RX_BUFFER_SIZE1];
 volatile unsigned int 	rx_wr_index1,rx_rd_index1,rx_counter1;
 volatile u8  			rx_buffer_overflow1;
 
-/*
+//----------дл€ uart6----------------------------------
 uint8_t 		RX6_uBUF[1];
 unsigned int 	timer_DMA2_6;
 u8 				flag_pachka_TXT6; //
-uint16_t  		text_lengh;
-uint8_t 		text_buffer[Bufer_size];
-volatile char          	rx_buffer1[RX_BUFFER_SIZE1];
-volatile unsigned int 	rx_wr_index1,rx_rd_index1,rx_counter1;
-volatile u8  			rx_buffer_overflow1;
-*/
+uint16_t  		text_lengh6;
+uint8_t 		text_buffer6[Bufer_size];
+volatile char          	rx_buffer6[RX_BUFFER_SIZE1];
+volatile unsigned int 	rx_wr_index6,rx_rd_index6,rx_counter6;
+volatile u8  			rx_buffer_overflow6;
+//-----------------------------------------------------
 
-char sr[BUFFER_SR+1];
+//char sr[BUFFER_SR+1];
+//u16  lenght;
+
 unsigned char lsr;
 unsigned char lk;
 unsigned int led_tick;
@@ -122,7 +125,7 @@ char In_data[BUF_STR];
 char ink1; //
 char data_in;
 
-u16 lenght;
+
 u16 SCH_LENGHT_PACKET;
 	
 unsigned     int index1;
@@ -930,6 +933,20 @@ unsigned int leng ( char *s)
   return i;
 }
 
+void Transf_6(char* s)  // процедура отправки строки символов в порт
+{
+  u32 l=0;
+  u32 i=0;
+         
+  if ((flag_pachka_TXT6==0) )
+  {
+    l=strlen(s);
+    if ((text_lengh6+l)>Bufer_size-5) text_lengh6=0u;
+    for (i=text_lengh6;i<(text_lengh6+l);i++) text_buffer6[i]=s[i-text_lengh6];
+    text_lengh6=text_lengh6+l;
+  } 
+}
+
 void Transf(char* s)  // процедура отправки строки символов в порт
 {
   u32 l=0;
@@ -939,7 +956,7 @@ void Transf(char* s)  // процедура отправки строки символов в порт
   {
     l=strlen(s);
     if ((text_lengh1+l)>Bufer_size-5) text_lengh1=0u;
-    for (i=text_lengh1;i<(text_lengh1+l);i++) text_buffer[i]=s[i-text_lengh1];
+    for (i=text_lengh1;i<(text_lengh1+l);i++) text_buffer1[i]=s[i-text_lengh1];
     text_lengh1=text_lengh1+l;
   } 
 }
@@ -1088,7 +1105,7 @@ void UART_IT_TX (void)
 if ((flag_pachka_TXT1==0)&&(text_lengh1>1u))
 { 
     k = text_lengh1;
-  	HAL_UART_Transmit_IT(&huart1,text_buffer,k);
+  	HAL_UART_Transmit_IT(&huart1,text_buffer1,k);
     text_lengh1=0u;  //обнуление счЄтчика буфера 
     flag_pachka_TXT1=1; //устанавливаем флаг передачи
   }
@@ -1104,10 +1121,27 @@ if (HAL_UART_GetState(&huart1)!=HAL_UART_STATE_BUSY_TX )
 		if ((flag_pachka_TXT1==0)&&(text_lengh1>1u)&&(timer_DMA2_7>250))
 		 {
 			k = text_lengh1;
-			HAL_UART_Transmit_DMA(&huart1,(uint8_t *)text_buffer,k);
+			HAL_UART_Transmit_DMA(&huart1,(uint8_t *)text_buffer1,k);
 			text_lengh1=0u;  //обнуление счЄтчика буфера 
 			flag_pachka_TXT1=1; //устанавливаем флаг передачи
 			timer_DMA2_7=0;
+		  }
+	}	
+} 
+
+void UART_DMA_TX6 (void)
+{
+ uint16_t k;
+
+if (HAL_UART_GetState(&huart6)!=HAL_UART_STATE_BUSY_TX )
+	{
+		if ((flag_pachka_TXT6==0)&&(text_lengh6>1u)&&(timer_DMA2_6>250))
+		 {
+			k = text_lengh1;
+			HAL_UART_Transmit_DMA(&huart6,(uint8_t *)text_buffer6,k);
+			text_lengh6=0u;  //обнуление счЄтчика буфера 
+			flag_pachka_TXT6=1; //устанавливаем флаг передачи
+			timer_DMA2_6=0;
 		  }
 	}	
 } 
@@ -1221,17 +1255,14 @@ void info ()
 
 
 u32 crc_input=0u; 
-u32 crc_comp=0u;
+u32 crc_comp =0u;
 
 u32 IO ( char* str)      // функци€ обработки протокола обмена
 {
-
  unsigned int i=0;
-	uint8_t z1=0;
-  i = lenght;//длинна прин€той пачки
-  if (lenght==0) i = leng(str);
-  lenght = 0;
- 
+ 	 uint8_t z1=0;
+
+ i = leng(str);
   indexZ = 0;
   
   if ((time_uart>50u)||(SCH_LENGHT_PACKET>MAX_PL))
@@ -1573,45 +1604,83 @@ char getchar1(void)
     --rx_counter1;
     return data;
 }
+
+char getchar6(void)
+{
+   uint8_t data;
+   while (rx_counter6 == 0);
+   data = rx_buffer6[ rx_rd_index6++ ];
+   if (rx_rd_index6 == RX_BUFFER_SIZE1) rx_rd_index6 = 0;
+    --rx_counter6;
+    return data;
+}
       
  void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
- //-------------------------  
-   rx_buffer1[rx_wr_index1++]= (uint8_t) (RX1_uBUF[0]& 0xFF); //считываем данные в буфер, инкрементиру€ хвост буфера
-   if ( rx_wr_index1 == RX_BUFFER_SIZE1) rx_wr_index1=0; //идем по кругу
+	 if (huart == &huart1)
+	 {
+		//-------------------------  
+		rx_buffer1[rx_wr_index1++]= (uint8_t) (RX1_uBUF[0]& 0xFF); //считываем данные в буфер, инкрементиру€ хвост буфера
+		if ( rx_wr_index1 == RX_BUFFER_SIZE1) rx_wr_index1=0; //идем по кругу
    	 
-	  if (++rx_counter1 == RX_BUFFER_SIZE1) //переполнение буфера
-      {
+		if (++rx_counter1 == RX_BUFFER_SIZE1) //переполнение буфера
+		{
         rx_counter1=0; //начинаем сначала (удал€ем все данные)
         rx_buffer_overflow1=1;  //сообщаем о переполнении
-      }
-	  
- //--------------------------  
-   HAL_UART_Receive_IT(&huart1,RX1_uBUF,1);
+		}	  
+		//--------------------------  
+		HAL_UART_Receive_IT(&huart1,RX1_uBUF,1); 
+	 } else
+	 if (huart == &huart6)
+	 {
+		//-------------------------  
+		rx_buffer6[rx_wr_index6++]= (uint8_t) (RX6_uBUF[0]& 0xFF); //считываем данные в буфер, инкрементиру€ хвост буфера
+		if ( rx_wr_index6 == RX_BUFFER_SIZE1) rx_wr_index6=0; //идем по кругу
+   	 
+		if (++rx_counter6 == RX_BUFFER_SIZE1) //переполнение буфера
+		{
+        rx_counter6=0; //начинаем сначала (удал€ем все данные)
+        rx_buffer_overflow6=1;  //сообщаем о переполнении
+		}	  
+		//--------------------------  
+		HAL_UART_Receive_IT(&huart6,RX6_uBUF,1);  
+	 }		 
+ 
 }
 
-
-
-void UART_conrol (void)
+char sr_1[BUFFER_SR];
+u16  word_length_1=0;
+void UART_conrol_1 (void)
 {
- u16 i=0;
- u16 j=0;
-
-  if (rx_counter1!=0u)
+  while (rx_counter1>0)
     {   
-      if (rx_counter1<BUFFER_SR) j = rx_counter1; else j=BUFFER_SR;
-
-      for (i=0u;i<j; i++) 
-         {
-           sr[i]=getchar1();
-           lenght=i+1;  
-           if (sr[i]==';') {break;}
-          }
-            sr[lenght]=0x00;
-            IO (sr);
-        };
+            sr_1[word_length_1]=getchar1();
+		if (sr_1[word_length_1]!=';') word_length_1++; 
+		else
+		{   
+			sr_1[word_length_1++]==0;
+			     word_length_1=0;
+			IO(sr_1);			   
+		}		       
+    }
 }
 
+char sr_6[BUFFER_SR];
+u16  word_length_6=0;
+void UART_conrol_6 (void)
+{
+  while (rx_counter6>0)
+    {   
+            sr_6[word_length_6]=getchar6();
+		if (sr_6[word_length_6]!=';') word_length_6++; 
+		else
+		{   
+			sr_6[word_length_6++]==0;
+			     word_length_6=0;
+			IO(sr_6);			   
+		}		       
+    }
+}
 
 void LED (void)
 {
@@ -1624,6 +1693,7 @@ void LED (void)
 		LED3(0);
 		FLAG_T1=1;
 		TEST_LED=TEST_LED<<1;
+		Transf_6("TEST!\r\n");
 	}
 	
 	if ((TIMER1>200)&&(FLAG_T2==0)) 
@@ -2055,8 +2125,8 @@ int main(void)
 	PWR_5V_EN		(1);// 1 - включить tps7a8300
 	PWR_3V_EN		(1);// 1 - включить tps7a8300
 	
-	PWR_HM_EN		(0);// 0 - pwrdn MIC5205
- HM_TR_ENABLE_3V3	(0);// 0 - SLEEP 		HM-TR
+	PWR_HM_EN		(1);// 0 - pwrdn MIC5205
+ HM_TR_ENABLE_3V3	(1);// 0 - SLEEP 		HM-TR
  HM_TR_CONFIG_3V3	(0);// 1 - CONFIGURE 	HM-TR
  
  LE_A_ATT			(0);// 1 - запись уровн€ аттенюации 
@@ -2065,8 +2135,7 @@ int main(void)
  D2_S1				(0);
  D3_S1				(0);
  D4_S1				(0);
- D5_S1				(0);
- 
+ D5_S1				(0); 
 
 ADF_LE	  (0);//сигнал загрузки в м-му ADF 
 SPI3_CS_MK(0);//выключение микрухи ADF 
@@ -2075,7 +2144,6 @@ SPI3_CS_MK(0);//выключение микрухи ADF
   LED1(0);
   LED2(0);
   LED3(0);
-
 
  while (i<200)
  {
@@ -2086,11 +2154,11 @@ SPI3_CS_MK(0);//выключение микрухи ADF
   while (1)
   {
 	LED();
-	UART_conrol();
-	PLL_ZAHVAT ();
-	ADC_meas   ();
-    UART_DMA_TX();
-//	if (FLAG_DMA_ADC==1) {DMA_ADC();FLAG_DMA_ADC=0;}	
+	UART_conrol_1();
+	PLL_ZAHVAT   ();
+	ADC_meas     ();
+    UART_DMA_TX  ();
+	UART_DMA_TX6 ();
   }
 
 }
