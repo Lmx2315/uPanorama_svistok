@@ -63,7 +63,7 @@ void INIT_PLL (reg_ADF4351 *pll)
 	pll->RDIV2							=1;
 	pll->R_COUNTER						=50;
 	pll->DOUB_BUFFER					=0;
-	pll->CP_CURRENT						=15;//15 - 5 mA,7-2.5mA
+	pll->CP_CURRENT						=5;//15 - 5 mA,7-2.5mA
 	pll->LDF							=1;//1 - INT N
 	pll->LDP							=0;//0 - 10 ns
 	pll->PD_POLARITY					=1;//0 - negative 1 -positive

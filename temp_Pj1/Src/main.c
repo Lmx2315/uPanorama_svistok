@@ -1910,7 +1910,7 @@ void CMD_search (ID_SERVER *id,SERVER *srv)
 			//выполн€ем команду
 			if (data!=0)
 			{
-				GK153_PWRDN	  (1);
+	//			GK153_PWRDN	  (1);
 				ADL_PWRDN	  (1);// 1 - powerdown ADL5375
 				APLF1_PWRDN	  (1);// 1 - усилитель (1) выключен
 				APLF2_PWRDN	  (1);// 1 - усилитель (2) выключен
@@ -1921,7 +1921,7 @@ void CMD_search (ID_SERVER *id,SERVER *srv)
 			HM_TR_ENABLE_3V3  (0);// 0 - SLEEP 		HM-TR	
 			}else
 			{
-				GK153_PWRDN	  (0);
+	//			GK153_PWRDN	  (0);
 				ADL_PWRDN	  (0);// 1 - powerdown ADL5375
 				APLF1_PWRDN	  (0);// 1 - усилитель (1) выключен
 				APLF2_PWRDN	  (0);// 1 - усилитель (2) выключен
@@ -2043,7 +2043,7 @@ int main(void)
   HAL_UART_Receive_IT(&huart1,RX1_uBUF,1);
   HAL_ADC_Start_DMA  (&hadc1,(uint32_t*)&adcBuffer,8); // Start ADC in DMA 
 
- GK153_PWRDN		(0);
+ GK153_PWRDN		(1);//управление смещением по частоте 100 ћ√ц ref
  ADL_PWRDN			(0);// 1 - powerdown ADL5375
  
  APLF1_PWRDN		(1);// 1 - усилитель (1) выключен

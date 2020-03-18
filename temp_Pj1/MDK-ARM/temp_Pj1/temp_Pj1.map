@@ -1450,7 +1450,7 @@ Removing Unused input sections from the image.
     Removing main.o(.rrx_text), (6 bytes).
     Removing main.o(i.ADC_Temp), (104 bytes).
     Removing main.o(i.ADC_test), (516 bytes).
-    Removing main.o(i.CMD_search), (1472 bytes).
+    Removing main.o(i.CMD_search), (1444 bytes).
     Removing main.o(i.DMA_ADC), (28 bytes).
     Removing main.o(i.FPGA_rSPI), (544 bytes).
     Removing main.o(i.MX_I2C1_Init), (60 bytes).
@@ -2104,7 +2104,7 @@ Removing Unused input sections from the image.
     Removing system_stm32f4xx.o(.rrx_text), (6 bytes).
     Removing system_stm32f4xx.o(i.SystemCoreClockUpdate), (192 bytes).
 
-659 unused section(s) (total 68688 bytes) removed from the image.
+659 unused section(s) (total 68660 bytes) removed from the image.
 
 ==============================================================================
 
