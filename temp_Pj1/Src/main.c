@@ -77,16 +77,14 @@ u32 FLAG_T1;
 u32 FLAG_T2;
 u8 FLAG_FAPCH_ON;
 
-uint8_t RX_uBUF[1];
-
-unsigned int timer_DMA2;
-u8 flag_pachka_TXT; //
-uint16_t  text_lengh;
-uint8_t text_buffer[Bufer_size];
-
-volatile char          rx_buffer1[RX_BUFFER_SIZE1];
-volatile unsigned int rx_wr_index1,rx_rd_index1,rx_counter1;
-volatile u8  rx_buffer_overflow1;
+uint8_t 		RX1_uBUF[1];
+unsigned int 	timer_DMA2_7;
+u8 				flag_pachka_TXT1; //
+uint16_t  		text_lengh;
+uint8_t 		text_buffer[Bufer_size];
+volatile char          	rx_buffer1[RX_BUFFER_SIZE1];
+volatile unsigned int 	rx_wr_index1,rx_rd_index1,rx_counter1;
+volatile u8  			rx_buffer_overflow1;
 
 
 char sr[BUFFER_SR+1];
@@ -927,7 +925,7 @@ void Transf(char* s)  // процедура отправки строки символов в порт
   u32 l=0;
   u32 i=0;
          
-  if ((flag_pachka_TXT==0) )
+  if ((flag_pachka_TXT1==0) )
   {
     l=strlen(s);
     if ((text_lengh+l)>Bufer_size-5) text_lengh=0u;
@@ -1077,12 +1075,12 @@ void UART_IT_TX (void)
 {
 // uint16_t k;
 /*
-if ((flag_pachka_TXT==0)&&(text_lengh>1u))
+if ((flag_pachka_TXT1==0)&&(text_lengh>1u))
 { 
     k = text_lengh;
   	HAL_UART_Transmit_IT(&huart1,text_buffer,k);
     text_lengh=0u;  //обнуление счЄтчика буфера 
-    flag_pachka_TXT=1; //устанавливаем флаг передачи
+    flag_pachka_TXT1=1; //устанавливаем флаг передачи
   }
   */
 }
@@ -1093,13 +1091,13 @@ void UART_DMA_TX (void)
 
 if (HAL_UART_GetState(&huart1)!=HAL_UART_STATE_BUSY_TX )
 	{
-		if ((flag_pachka_TXT==0)&&(text_lengh>1u)&&(timer_DMA2>250))
+		if ((flag_pachka_TXT1==0)&&(text_lengh>1u)&&(timer_DMA2_7>250))
 		 {
 			k = text_lengh;
 			HAL_UART_Transmit_DMA(&huart1,(uint8_t *)text_buffer,k);
 			text_lengh=0u;  //обнуление счЄтчика буфера 
-			flag_pachka_TXT=1; //устанавливаем флаг передачи
-			timer_DMA2=0;
+			flag_pachka_TXT1=1; //устанавливаем флаг передачи
+			timer_DMA2_7=0;
 		  }
 	}	
 } 
@@ -1569,7 +1567,7 @@ char getchar1(void)
  void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
  //-------------------------  
-   rx_buffer1[rx_wr_index1++]= (uint8_t) (RX_uBUF[0]& 0xFF); //считываем данные в буфер, инкрементиру€ хвост буфера
+   rx_buffer1[rx_wr_index1++]= (uint8_t) (RX1_uBUF[0]& 0xFF); //считываем данные в буфер, инкрементиру€ хвост буфера
    if ( rx_wr_index1 == RX_BUFFER_SIZE1) rx_wr_index1=0; //идем по кругу
    	 
 	  if (++rx_counter1 == RX_BUFFER_SIZE1) //переполнение буфера
@@ -1579,7 +1577,7 @@ char getchar1(void)
       }
 	  
  //--------------------------  
-   HAL_UART_Receive_IT(&huart1,RX_uBUF,1);
+   HAL_UART_Receive_IT(&huart1,RX1_uBUF,1);
 }
 
 
@@ -2014,7 +2012,7 @@ int main(void)
 //MX_SPI5_Init();
   MX_USART1_UART_Init();
 //MX_USART2_UART_Init();
-//MX_USART6_UART_Init();
+  MX_USART6_UART_Init();
   /* USER CODE BEGIN 2 */
 
 //  Delay(1000);
@@ -2031,7 +2029,7 @@ int main(void)
 
   Massiv_dbm();
  
-  HAL_UART_Receive_IT(&huart1,RX_uBUF,1);
+  HAL_UART_Receive_IT(&huart1,RX1_uBUF,1);
   HAL_ADC_Start_DMA  (&hadc1,(uint32_t*)&adcBuffer,8); // Start ADC in DMA 
 
  GK153_PWRDN		(0);

@@ -45,11 +45,11 @@
 
 extern uint32_t TIMER1;
 extern u32 TIMER_BP_PWM;
-extern u8 flag_pachka_TXT; //устанавливаем флаг передачи
+extern u8 flag_pachka_TXT1; //устанавливаем флаг передачи
 extern volatile unsigned int rx_wr_index1,rx_rd_index1,rx_counter1;
 extern volatile u32 SysTickDelay; 
 
-extern unsigned int timer_DMA2;
+extern unsigned int timer_DMA2_7;
 extern u8 EVENT_INT0;
 extern u8 EVENT_INT1;
 extern u8 EVENT_INT2;
@@ -210,7 +210,7 @@ void SysTick_Handler(void)
   if (SysTickDelay != 0) {SysTickDelay--;}  
 
   if (TIMER_BP_PWM!=0) TIMER_BP_PWM--;
-  timer_DMA2++;
+  timer_DMA2_7++;
   TIMER1++;
   TIME_SYS++;
   TIME_TEST++;
@@ -345,7 +345,7 @@ void DMA2_Stream6_IRQHandler(void)
 void DMA2_Stream7_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA2_Stream7_IRQn 0 */
-	flag_pachka_TXT=0; //снимаем флаг передачи
+	flag_pachka_TXT1=0; //снимаем флаг передачи
   /* USER CODE END DMA2_Stream7_IRQn 0 */
   HAL_DMA_IRQHandler(&hdma_usart1_tx);
   /* USER CODE BEGIN DMA2_Stream7_IRQn 1 */
