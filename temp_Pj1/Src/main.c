@@ -80,12 +80,22 @@ u8 FLAG_FAPCH_ON;
 uint8_t 		RX1_uBUF[1];
 unsigned int 	timer_DMA2_7;
 u8 				flag_pachka_TXT1; //
-uint16_t  		text_lengh;
+uint16_t  		text_lengh1;
 uint8_t 		text_buffer[Bufer_size];
 volatile char          	rx_buffer1[RX_BUFFER_SIZE1];
 volatile unsigned int 	rx_wr_index1,rx_rd_index1,rx_counter1;
 volatile u8  			rx_buffer_overflow1;
 
+/*
+uint8_t 		RX6_uBUF[1];
+unsigned int 	timer_DMA2_6;
+u8 				flag_pachka_TXT6; //
+uint16_t  		text_lengh;
+uint8_t 		text_buffer[Bufer_size];
+volatile char          	rx_buffer1[RX_BUFFER_SIZE1];
+volatile unsigned int 	rx_wr_index1,rx_rd_index1,rx_counter1;
+volatile u8  			rx_buffer_overflow1;
+*/
 
 char sr[BUFFER_SR+1];
 unsigned char lsr;
@@ -928,9 +938,9 @@ void Transf(char* s)  // процедура отправки строки символов в порт
   if ((flag_pachka_TXT1==0) )
   {
     l=strlen(s);
-    if ((text_lengh+l)>Bufer_size-5) text_lengh=0u;
-    for (i=text_lengh;i<(text_lengh+l);i++) text_buffer[i]=s[i-text_lengh];
-    text_lengh=text_lengh+l;
+    if ((text_lengh1+l)>Bufer_size-5) text_lengh1=0u;
+    for (i=text_lengh1;i<(text_lengh1+l);i++) text_buffer[i]=s[i-text_lengh1];
+    text_lengh1=text_lengh1+l;
   } 
 }
 
@@ -1075,11 +1085,11 @@ void UART_IT_TX (void)
 {
 // uint16_t k;
 /*
-if ((flag_pachka_TXT1==0)&&(text_lengh>1u))
+if ((flag_pachka_TXT1==0)&&(text_lengh1>1u))
 { 
-    k = text_lengh;
+    k = text_lengh1;
   	HAL_UART_Transmit_IT(&huart1,text_buffer,k);
-    text_lengh=0u;  //обнуление счётчика буфера 
+    text_lengh1=0u;  //обнуление счётчика буфера 
     flag_pachka_TXT1=1; //устанавливаем флаг передачи
   }
   */
@@ -1091,11 +1101,11 @@ void UART_DMA_TX (void)
 
 if (HAL_UART_GetState(&huart1)!=HAL_UART_STATE_BUSY_TX )
 	{
-		if ((flag_pachka_TXT1==0)&&(text_lengh>1u)&&(timer_DMA2_7>250))
+		if ((flag_pachka_TXT1==0)&&(text_lengh1>1u)&&(timer_DMA2_7>250))
 		 {
-			k = text_lengh;
+			k = text_lengh1;
 			HAL_UART_Transmit_DMA(&huart1,(uint8_t *)text_buffer,k);
-			text_lengh=0u;  //обнуление счётчика буфера 
+			text_lengh1=0u;  //обнуление счётчика буфера 
 			flag_pachka_TXT1=1; //устанавливаем флаг передачи
 			timer_DMA2_7=0;
 		  }
