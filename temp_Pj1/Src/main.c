@@ -2152,6 +2152,7 @@ int main(void)
 	 Delay(1);
  } 
 
+  IO("~0 adf:3000;"); //включаем свисток
   while (1)
   {
 	LED();
@@ -2160,7 +2161,6 @@ int main(void)
 	ADC_meas     ();
     UART_DMA_TX  ();
 	UART_DMA_TX6 ();
-//	UART_DMA_TX6 ("1234",4);
   }
 
 }
