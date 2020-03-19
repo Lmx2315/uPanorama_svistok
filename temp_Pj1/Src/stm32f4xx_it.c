@@ -216,6 +216,7 @@ void SysTick_Handler(void)
 
   if (TIMER_BP_PWM!=0) TIMER_BP_PWM--;
   timer_DMA2_7++;
+  timer_DMA2_6++;
   TIMER1++;
   TIME_SYS++;
   TIME_TEST++;

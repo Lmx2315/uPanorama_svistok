@@ -89,9 +89,9 @@ volatile u8  			rx_buffer_overflow1;
 
 //----------дл€ uart6----------------------------------
 uint8_t 		RX6_uBUF[1];
-unsigned int 	timer_DMA2_6;
+unsigned int 	timer_DMA2_6=0;
 u8 				flag_pachka_TXT6; //
-uint16_t  		text_lengh6;
+uint16_t  		text_lengh6=0;
 uint8_t 		text_buffer6[Bufer_size];
 volatile char          	rx_buffer6[RX_BUFFER_SIZE1];
 volatile unsigned int 	rx_wr_index6,rx_rd_index6,rx_counter6;
@@ -289,7 +289,7 @@ void SystemClock_Config(void)
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_3) != HAL_OK)
@@ -671,10 +671,10 @@ static void MX_DMA_Init(void)
   /* DMA2_Stream0_IRQn interrupt configuration */ //ADC
   HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
-  /* DMA2_Stream6_IRQn interrupt configuration */
+  /* DMA2_Stream6_IRQn interrupt configuration *///UART6
   HAL_NVIC_SetPriority(DMA2_Stream6_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream6_IRQn);
-  /* DMA2_Stream7_IRQn interrupt configuration */
+  /* DMA2_Stream7_IRQn interrupt configuration *///UART1
   HAL_NVIC_SetPriority(DMA2_Stream7_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream7_IRQn);
 
@@ -1129,16 +1129,17 @@ if (HAL_UART_GetState(&huart1)!=HAL_UART_STATE_BUSY_TX )
 	}	
 } 
 
-void UART_DMA_TX6 (void)
+//void UART_DMA_TX6 (char *s,u8 l)
+  void UART_DMA_TX6 (void)
 {
  uint16_t k;
-
-if (HAL_UART_GetState(&huart6)!=HAL_UART_STATE_BUSY_TX )
+	if (HAL_UART_GetState(&huart6)!=HAL_UART_STATE_BUSY_TX )
 	{
 		if ((flag_pachka_TXT6==0)&&(text_lengh6>1u)&&(timer_DMA2_6>250))
 		 {
-			k = text_lengh1;
+			k = text_lengh6;
 			HAL_UART_Transmit_DMA(&huart6,(uint8_t *)text_buffer6,k);
+//			HAL_UART_Transmit_DMA(&huart6,s,l);
 			text_lengh6=0u;  //обнуление счЄтчика буфера 
 			flag_pachka_TXT6=1; //устанавливаем флаг передачи
 			timer_DMA2_6=0;
@@ -1694,6 +1695,7 @@ void LED (void)
 		FLAG_T1=1;
 		TEST_LED=TEST_LED<<1;
 		Transf_6("TEST!\r\n");
+		Transf  ("TEST!\r\n");
 	}
 	
 	if ((TIMER1>200)&&(FLAG_T2==0)) 
@@ -2083,7 +2085,6 @@ int main(void)
   /* Initialize all configured peripherals */
 //MX_I2C1_Init();
   MX_GPIO_Init();
-
   MX_DMA_Init ();
   MX_ADC1_Init();
 //MX_TIM1_Init();
@@ -2094,6 +2095,7 @@ int main(void)
   MX_USART1_UART_Init();
 //MX_USART2_UART_Init();
   MX_USART6_UART_Init();
+ 
   /* USER CODE BEGIN 2 */
 
 //  Delay(1000);
@@ -2101,8 +2103,6 @@ int main(void)
   Transf("---------------------------\r\n");
   Transf("    uѕанорама - —висток\r\n");
   Transf("---------------------------\r\n");
-  
-  PWDWN_WIZ820(1);
 
   LED1(1);
   LED2(1);
@@ -2111,6 +2111,7 @@ int main(void)
   Massiv_dbm();
  
   HAL_UART_Receive_IT(&huart1,RX1_uBUF,1);
+  HAL_UART_Receive_IT(&huart6,RX6_uBUF,1);
   HAL_ADC_Start_DMA  (&hadc1,(uint32_t*)&adcBuffer,8); // Start ADC in DMA 
 
  GK153_PWRDN		(1);//управление смещением по частоте 100 ћ√ц ref
@@ -2137,9 +2138,9 @@ int main(void)
  D4_S1				(0);
  D5_S1				(0); 
 
-ADF_LE	  (0);//сигнал загрузки в м-му ADF 
-SPI3_CS_MK(0);//выключение микрухи ADF 
- ATT (0);
+  ADF_LE	  (0);//сигнал загрузки в м-му ADF 
+  SPI3_CS_MK(0);  //выключение микрухи ADF 
+  ATT (0);
  
   LED1(0);
   LED2(0);
@@ -2159,6 +2160,7 @@ SPI3_CS_MK(0);//выключение микрухи ADF
 	ADC_meas     ();
     UART_DMA_TX  ();
 	UART_DMA_TX6 ();
+//	UART_DMA_TX6 ("1234",4);
   }
 
 }
