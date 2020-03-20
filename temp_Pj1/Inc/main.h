@@ -539,6 +539,12 @@ u32 SEND_UDP_MSG (void);
 void ADF4351_prog (u32);
 void RECEIVE_udp(SOCKET , uint16 );
 void ATT (u8);
+void STATUS (void);
+void Transf_6(char*);
+void fn_out6 (char s[],float );
+void un_out6 (char s[],u32 a);
+void xn_out6 (char s[],u32 a);
+
 //void SEND_udp(SOCKET , uint16 ,uint32 ,uint16 );
 
 

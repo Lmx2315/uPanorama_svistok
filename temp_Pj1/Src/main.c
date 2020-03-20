@@ -75,7 +75,7 @@ volatile u32  SysTickDelay;
 
 u32 FLAG_T1;
 u32 FLAG_T2;
-u8 FLAG_FAPCH_ON;
+u8  FLAG_FAPCH_ON;
 
 //----------для uart1----------------------------------
 uint8_t 		RX1_uBUF[1];
@@ -125,6 +125,11 @@ char In_data[BUF_STR];
 char ink1; //
 char data_in;
 
+u8 FLAG_PWR_V5V   =0;
+u8 FLAG_PWR_V3V   =0;
+u8 FLAG_APLF1     =0;
+u8 FLAG_ATT_LEVEL =0;
+u8 FLAG_PLL_ZAHVAT=0; //переменная отвечающая за сигнал захвата ФАПЧ
 
 u16 SCH_LENGHT_PACKET;
 	
@@ -153,6 +158,7 @@ char sym1;
 float U12V=0;
 float U5V =0;
 float U3V3=0;
+float TEMP=0;
 
 u32 sch_rx_byte;
   
@@ -187,13 +193,10 @@ u8 EVENT_INT7=0;
 u8 EVENT_INT8=0;
 u8 FLAG_DMA_ADC=0;
 
-u32 TEST_LED=0;
-u64 TIME_SYS=0;//переменная хранить системное время в милисекундах
+u32 TEST_LED =0;
+u64 TIME_SYS =0;            //переменная хранить системное время в милисекундах
 u32 TIME_TEST=0;
-u32 ID_CMD=0;						//переменная хранить текущий ID наших квитанций 
-
-u8 PWR_CHANNEL=255;
-u8 FLAG_PLL_ZAHVAT=0;  //переменная отвечающая за сигнал захвата ФАПЧ
+u32 ID_CMD   =0;			//переменная хранить текущий ID наших квитанций 
 //-----------------------------------------------------------------------------
 //                           описание структур управления и квитанций
 /* USER CODE END PV */
@@ -324,18 +327,18 @@ static void MX_ADC1_Init(void)
   /* USER CODE END ADC1_Init 1 */
   /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion) 
   */
-  hadc1.Instance = ADC1;
-  hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV2;
-  hadc1.Init.Resolution = ADC_RESOLUTION_12B;
-  hadc1.Init.ScanConvMode = ENABLE;
-  hadc1.Init.ContinuousConvMode = ENABLE;
+  hadc1.Instance                   = ADC1;
+  hadc1.Init.ClockPrescaler        = ADC_CLOCK_SYNC_PCLK_DIV2;
+  hadc1.Init.Resolution            = ADC_RESOLUTION_10B;
+  hadc1.Init.ScanConvMode          = ENABLE;
+  hadc1.Init.ContinuousConvMode    = ENABLE;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
-  hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
-  hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
-  hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc1.Init.NbrOfConversion = 4;
+  hadc1.Init.ExternalTrigConvEdge  = ADC_EXTERNALTRIGCONVEDGE_NONE;
+  hadc1.Init.ExternalTrigConv      = ADC_SOFTWARE_START;
+  hadc1.Init.DataAlign 			   = ADC_DATAALIGN_RIGHT;
+  hadc1.Init.NbrOfConversion       = 5;
   hadc1.Init.DMAContinuousRequests = ENABLE;
-  hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+  hadc1.Init.EOCSelection          = ADC_EOC_SINGLE_CONV;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
   {
     Error_Handler();
@@ -349,28 +352,38 @@ static void MX_ADC1_Init(void)
   {
     Error_Handler();
   }
+  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
+  */
   sConfig.Channel = ADC_CHANNEL_1;
   sConfig.Rank = 2;
-  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
   }
+  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
+  */
   sConfig.Channel = ADC_CHANNEL_2;
   sConfig.Rank = 3;
-  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
   }
+  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
+  */
   sConfig.Channel = ADC_CHANNEL_3;
   sConfig.Rank = 4;
-  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }  
+  
+  sConfig.Channel = ADC_CHANNEL_TEMPSENSOR;
+  sConfig.Rank = 5;
+  sConfig.SamplingTime = ADC_SAMPLETIME_144CYCLES;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
   }
-  
 }
 
 /**
@@ -933,14 +946,51 @@ unsigned int leng ( char *s)
   return i;
 }
 
-void Transf_6(char* s)  // процедура отправки строки символов в порт
+void xn_out6 (char s[],u32 a)//выдача в 6-й уартбыло u64 
+{
+   Transf_6 (s);
+   sprintf (strng,"%X",a);
+   Transf_6(strng);
+}
+
+void un_out6 (char s[],u32 a)//выдача в 6-й уарт
+{
+   Transf_6 (s);
+   //itoa (a,strng,10);
+   sprintf (strng,"%u",a);
+   Transf_6(strng);
+}
+
+void fn_out6 (char s[],float a)//выдача в 6-й уарт
+{
+   Transf_6 (s);
+   //itoa (a,strng,10);
+   sprintf (strng,"%.2f",a);
+   Transf_6(strng);
+}
+
+void Transf_6(char* s)  // процедура отправки строки символов в порт 6-й уарт
+{
+  u32 l=0;
+  u32 i=0;         
+  if ((flag_pachka_TXT6==0) )
+  {
+    l=strlen(s);
+    if ((text_lengh6+l)>Bufer_size-5) text_lengh6=0u;
+    for (i=text_lengh6;i<(text_lengh6+l);i++) text_buffer6[i]=s[i-text_lengh6];
+    text_lengh6=text_lengh6+l;
+  } 
+}
+
+void Transf_6x(char* s,u8 n)  // процедура отправки массива в порт 6-й уарт
 {
   u32 l=0;
   u32 i=0;
          
   if ((flag_pachka_TXT6==0) )
   {
-    l=strlen(s);
+//  l=strlen(s);
+	l=n;
     if ((text_lengh6+l)>Bufer_size-5) text_lengh6=0u;
     for (i=text_lengh6;i<(text_lengh6+l);i++) text_buffer6[i]=s[i-text_lengh6];
     text_lengh6=text_lengh6+l;
@@ -1135,7 +1185,8 @@ if (HAL_UART_GetState(&huart1)!=HAL_UART_STATE_BUSY_TX )
  uint16_t k;
 	if (HAL_UART_GetState(&huart6)!=HAL_UART_STATE_BUSY_TX )
 	{
-		if ((flag_pachka_TXT6==0)&&(text_lengh6>1u)&&(timer_DMA2_6>250))
+		if ((flag_pachka_TXT6==0)&&(text_lengh6>1u))
+//		if ((flag_pachka_TXT6==0)&&(text_lengh6>1u)&&(timer_DMA2_6>250))
 		 {
 			k = text_lengh6;
 			HAL_UART_Transmit_DMA(&huart6,(uint8_t *)text_buffer6,k);
@@ -1321,7 +1372,7 @@ u32 IO ( char* str)      // функция обработки протокола обмена
 	 InOut[index1]=str[indexZ];
 	 SCH_LENGHT_PACKET++;//подсчитываем длинну пакета
 		 
-	if (( InOut[index1]==';')&&(FLAG_DATA==0u)&&(packet_flag==1))  {packet_flag=0;packet_ok=1u;FLAG_CW=1u;}
+	if (( InOut[index1]==';')&&(FLAG_DATA==0u)&&(packet_flag==1))  {packet_flag=0;packet_ok=1u;FLAG_CW=1u;break;}
     
 	if (((InOut[index1]=='=')||(InOut[index1]==':'))&&(data_flag==0)) {data_flag=1u;FLAG_CW=1u;}
 
@@ -1367,13 +1418,15 @@ if (crc_ok==0x3)  //обработка команд адресатом которых является хозяин
 if (strcmp(Word,"time")==0) //
    {
 	  crc_comp =atoi  (DATA_Word); 
-//    u_out ("принял time:",crc_comp); 
-//	  u_out("TIME_SYS:",TIME_SYS);
 	  u64_out("TIME_SYS:",TIME_SYS);
-//	  u_out("TIMER1  :",TIMER1);
-//	  u_out("TIME_TEST:",TIME_TEST);
 	  
-   } else	
+   } else
+if (strcmp(Word,"status")==0) //
+   {
+	  crc_comp =atoi  (DATA_Word); 
+      u_out ("принял status:",crc_comp); 
+	  STATUS();
+   } else	   
 if (strcmp(Word,"att")==0) //
    {
 	  crc_comp =atoi  (DATA_Word); 
@@ -1386,6 +1439,19 @@ if (strcmp(Word,"APLF")==0) //
       u_out ("принял APLF:",crc_comp); 
 	  APLF1_PWRDN (crc_comp);// 1 - усилитель (1) выключен
 	  APLF2_PWRDN (crc_comp);// 1 - усилитель (2) выключен
+	  FLAG_APLF1     =crc_comp;
+   } else
+if (strcmp(Word,"pwr")==0) //
+   {
+	  crc_comp =atoi  (DATA_Word); 
+      u_out ("принял pwr:",crc_comp); 
+	  APLF1_PWRDN (crc_comp);// 1 - усилитель (1) выключен
+	  APLF2_PWRDN (crc_comp);// 1 - усилитель (2) выключен
+	  PWR_5V_EN(crc_comp);
+      PWR_3V_EN(crc_comp);  
+	  FLAG_PWR_V5V   =crc_comp;
+	  FLAG_PWR_V3V   =crc_comp;
+	  FLAG_APLF1     =crc_comp;
    } else
 if (strcmp(Word,"adf")==0) //
    {
@@ -1460,7 +1526,7 @@ if (strcmp(Word,"MSG")==0) //
    {
 	  crc_comp =atoi  (DATA_Word); 
       u_out ("принял adc:",crc_comp); 
-     // ADC_test ();
+      ADC_test ();
 	 f_out("U12V:",U12V);
 	 f_out("U5V :",U5V);
 	 f_out("U3V3:",U3V3);
@@ -1694,8 +1760,8 @@ void LED (void)
 		LED3(0);
 		FLAG_T1=1;
 		TEST_LED=TEST_LED<<1;
-		Transf_6("TEST!\r\n");
-		Transf  ("TEST!\r\n");
+//		Transf_6x("TEST!\r\n",7);
+//		Transf  ("TEST!\r\n");
 	}
 	
 	if ((TIMER1>200)&&(FLAG_T2==0)) 
@@ -1767,12 +1833,57 @@ for (i=0;i<334;i++)
          }
 }
 
-double ADC_Temp(double t)
+void STATUS (void)
 {
-double TCelsius;	
-TCelsius = ((t - 0.760) / 0.0025) + 25.0 ;
-return TCelsius;
-} 
+ u8 i=0;
+ u32 var=0;
+
+ var=(u32)(U12V*100);
+ un_out6 ("~0 TRX1_U12V:",var);	            Transf_6(";\r\n");//отсылаем данные на базу
+ UART_DMA_TX6 ();
+ Delay(100); 
+ 
+ var=(u32)(U5V*100);
+ un_out6 ("~0 TRX1_U5V:" ,var); 		    Transf_6(";\r\n");//отсылаем данные на базу
+ UART_DMA_TX6 ();
+ Delay(100); 
+ 
+ var=(u32)(U3V3*100);
+ un_out6 ("~0 TRX1_U3V3:",var);   		    Transf_6(";\r\n");//отсылаем данные на базу 
+ UART_DMA_TX6 ();
+ Delay(100); 
+ 
+ un_out6 ("~0 TRX1_PLL:",FLAG_PLL_ZAHVAT);  Transf_6(";\r\n");//отсылаем данные на базу
+ UART_DMA_TX6 ();
+ Delay(100); 
+ 
+ un_out6 ("~0 TRX1_PWR_V5V:",FLAG_PWR_V5V); Transf_6(";\r\n");//отсылаем данные на базу
+ UART_DMA_TX6 ();
+ Delay(100); 
+ 
+ un_out6 ("~0 TRX1_PWR_V3V:",FLAG_PWR_V3V); Transf_6(";\r\n");//отсылаем данные на базу
+ UART_DMA_TX6 ();
+ Delay(100);
+ 
+ un_out6 ("~0 TRX1_APLF1:",FLAG_APLF1);     Transf_6(";\r\n");//отсылаем данные на базу
+ UART_DMA_TX6 ();
+ Delay(100); 
+ 
+ un_out6 ("~0 TRX1_ATT:",FLAG_ATT_LEVEL);   Transf_6(";\r\n");//отсылаем данные на базу
+ UART_DMA_TX6 ();
+ Delay(100); 
+ 
+ var=(u32)(TEMP*100);
+ un_out6 ("~0 TRX1_TEMP:",var);   Transf_6(";\r\n");//отсылаем данные на базу
+ UART_DMA_TX6 ();
+ Delay(100); 
+ 
+ /*
+ f_out("U12V:",U12V);
+ f_out("U5V :",U5V);
+ f_out("U3V3:",U3V3);
+ */
+}
 
 void ADC_test (void)
 {
@@ -1782,26 +1893,46 @@ void ADC_test (void)
 	u_out("CONTR_1     :",adcBuffer[1 ]);
 	u_out("CONTR_2     :",adcBuffer[2 ]);
 	u_out("CONTR_3     :",adcBuffer[3 ]);	
+	u_out("CONTR_4     :",adcBuffer[4]);
 	
-	f=adcBuffer[0]*3.3*5.83/4096;
+	f=adcBuffer[0]*3.3*5.83/1024;
 	f_out("adc0:",f);
 	
-	f=adcBuffer[1]*3.3*6.225/4096;//12V
+	f=adcBuffer[1]*3.3*6.225/1024;//12V
 	f_out("adc1:",f);
 	
-	f=adcBuffer[2]*3.3*5.83/4096;//5V
+	f=adcBuffer[2]*3.3*5.83/1024;//5V
 	f_out("adc2:",f);
 	
-	f=adcBuffer[3]*3.3*5.92/4096;//3.3V
+	f=adcBuffer[3]*3.3*5.92/1024;//3.3V
 	f_out("adc3:",f);
+	
+	f=adcBuffer[4]*3.3*1   /1024;//3.3V
+	f_out("adc4:",f);
 	
 }
 
+float ADC_Temp(float t)
+{
+float TCelsius;	
+TCelsius = ((t - 0.760) / 0.0025) + 25.0 ;
+return TCelsius;
+} 
+
 void ADC_meas (void)
 {
-	U12V=adcBuffer[1]*3.3*6.225/4096;//12V
-	U5V =adcBuffer[2]*3.3*5.83/4096;//5V
-	U3V3=adcBuffer[3]*3.3*5.92/4096;//3.3V
+	adc_ch[ 0] = adcBuffer[ 0]*3300/1024;
+	adc_ch[ 1] = adcBuffer[ 1]*3300/1024;
+	adc_ch[ 2] = adcBuffer[ 2]*3300/1024;
+	adc_ch[ 3] = adcBuffer[ 3]*3300/1024;
+	adc_ch[ 4] = adcBuffer[ 4]*3300/1024;
+		
+	U12V =adc_ch[1]*6.225/1000;//12V
+	U5V  =adc_ch[2]*5.83 /1000;//5V
+	U3V3 =adc_ch[3]*5.92 /1000;//3.3V
+	
+	TEMP =adc_ch[4]      /1000;//температура МК
+	TEMP =ADC_Temp(TEMP);
 }
 
 u8 FLAG_WDG=0;
@@ -1809,7 +1940,7 @@ u8 FLAG_WDG=0;
 void DMA_ADC (void)
 {
 	HAL_ADC_Start(&hadc1);
-	HAL_ADC_Start_DMA  (&hadc1,(uint32_t*)&adcBuffer,4); // Start ADC in DMA 	
+	HAL_ADC_Start_DMA  (&hadc1,(uint32_t*)&adcBuffer,5); // Start ADC in DMA 	
 }
 
 void WATCH_DOG (void)
@@ -2053,7 +2184,7 @@ u8 PIN_control_PB5 (void)
 void ATT (u8 a)
 {
 	u8 z=0;
-	
+	FLAG_ATT_LEVEL =a;
 	z=~a;
 	
 	if ((z>>0)&1)  D0_S1(1); else D0_S1(0);
@@ -2061,13 +2192,47 @@ void ATT (u8 a)
 	if ((z>>2)&1)  D2_S1(1); else D2_S1(0);
 	if ((z>>3)&1)  D3_S1(1); else D3_S1(0);
 	if ((z>>4)&1)  D4_S1(1); else D4_S1(0);
-	if ((z>>5)&1)  D5_S1(1); else D5_S1(0);
+	if ((z>>5)&1)  D5_S1(1); else D5_S1(0);	
 	
 	LE_A_ATT(1);
 	delay_us(100);
 	LE_A_ATT(0);
 }
   
+
+void HR_TR_init (void)
+{
+  char a[5];  
+//--------входим в режим config--------------  
+ HM_TR_ENABLE_3V3 (1);// 0 - SLEEP 		HM-TR
+     PWR_HM_EN    (0);// 0 - pwrdn MIC5205
+ HM_TR_CONFIG_3V3 (0);// 1 - CONFIGURE  HM-TR
+ Delay(100);
+ HM_TR_CONFIG_3V3 (1);// 1 - CONFIGURE  HM-TR
+ Delay(100);
+ PWR_HM_EN        (1);// 0 - pwrdn MIC5205
+ 
+ a[0]=0x12;
+ a[1]=0x01;
+ a[2]=0x00;
+ a[3]=0x00;
+ Transf_6x(a,4);//
+ 
+ delay_us(100);
+ a[0]=0x10;//для сбрасывания в дефолт.
+ a[1]=0x00;
+ a[2]=0x00;
+ a[3]=0x00;
+ Transf_6x(a,4);//
+//-----------возвращаемся в рабочий режим-------
+
+ Delay(100);
+ PWR_HM_EN        (0);// 0 - pwrdn MIC5205
+ HM_TR_CONFIG_3V3 (0);// 1 - CONFIGURE  HM-TR
+ Delay(100);
+ PWR_HM_EN        (1);// 0 - pwrdn MIC5205
+}
+
 int main(void)
 {
 	int i=0;
@@ -2082,7 +2247,7 @@ int main(void)
   /* Configure the system clock */
   SystemClock_Config();
 
-  /* Initialize all configured peripherals */
+/* Initialize all configured peripherals */
 //MX_I2C1_Init();
   MX_GPIO_Init();
   MX_DMA_Init ();
@@ -2112,7 +2277,7 @@ int main(void)
  
   HAL_UART_Receive_IT(&huart1,RX1_uBUF,1);
   HAL_UART_Receive_IT(&huart6,RX6_uBUF,1);
-  HAL_ADC_Start_DMA  (&hadc1,(uint32_t*)&adcBuffer,8); // Start ADC in DMA 
+  HAL_ADC_Start_DMA  (&hadc1,(uint32_t*)&adcBuffer,5); // Start ADC in DMA 
 
  GK153_PWRDN		(1);//управление смещением по частоте 100 МГц ref
  ADL_PWRDN			(0);// 1 - powerdown ADL5375
@@ -2151,16 +2316,23 @@ int main(void)
 	 i++;
 	 Delay(1);
  } 
-
+ //-------------
+  FLAG_PWR_V5V   =1;
+  FLAG_PWR_V3V   =1;
+  FLAG_APLF1     =1;
+ //-------------
+ 
+  HR_TR_init ();
   IO("~0 adf:3000;"); //включаем свисток
   while (1)
   {
 	LED();
 	UART_conrol_1();
+	UART_conrol_6();
 	PLL_ZAHVAT   ();
 	ADC_meas     ();
     UART_DMA_TX  ();
-	UART_DMA_TX6 ();
+//	UART_DMA_TX6 ();
   }
 
 }
